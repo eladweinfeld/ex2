@@ -39,7 +39,7 @@
         (if (equal? lst '())
             0
             (+ 1 (length (cdr lst))))
-  )
+    )
 )
 
 
@@ -105,7 +105,15 @@
 
                                
 (define compose-n
-  (lambda( f n)
-        @TODO
-  )
+    (lambda( f n)
+          (if (equal? n 1)
+              f
+              (compose f (compose-n f (- n 1))))
+    )
+)
+
+(define compose
+    (lambda( foo1 foo2)
+      (lambda (x)(foo1 (foo2 x)) 
+    )
 )
