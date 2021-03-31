@@ -35,18 +35,39 @@
 )
 
 (define length
-(lambda (lst)
-(if (equal? lst '())
-0
-(+ 1 (length (cdr lst))))))
+  (lambda (lst)
+    (if (equal? lst '())
+        0
+        (+ 1 (length (cdr lst))))))
 
 
 
 (define payment
   (lambda (n coins-lst)
-        @TODO
+        (if (equal? n 0)
+            1
+            (if ( < n 0)
+                0
+                (if (equal? coins-lst '())
+                    0
+                    (+ (payment (- n (car coins-lst)) (cdr coins-lst))
+                    (if (equal? (next_differnt_coin (car coins-lst) (cdr coins-lst)) '())
+                       0
+                       (payment n (next_differnt_coin (car coins-lst) (cdr coins-lst))))))))
+                               
   )
 )
+
+(define next_differnt_coin
+  (lambda (num coins-lst)
+    (if (equal? coins-lst '())
+        coins-lst
+        (if (equal? num (car coins-lst))
+        (next_differnt_coin num (cdr coins-lst))
+        coins-lst))
+  )
+)
+
                                
 (define compose-n
   (lambda( f n)
