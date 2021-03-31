@@ -1,48 +1,56 @@
 (define append 
-  (lambda(lst1 lst2)
-      (if (equal? lst1 '())
+    (lambda(lst1 lst2)
+        (if (equal? lst1 '())
             (if (equal? lst2 '())
-                lst2
+                '()
                 (cons (car lst2 ) (append lst1 (cdr lst2))))
             (cons (car lst1) (append (cdr lst1) lst2)))
-  )
+    )
 )
 
 (define reverse 
   (lambda (lst)
-       (if (equal? lst '())
-           lst
-           (append(reverse(cdr lst))(cons(car lst) '()) ))
+      (if (equal? lst '())
+          '()
+          (append(reverse(cdr lst))(cons(car lst) '()) ))
   )
 )
 
 (define duplicate-items
-   (lambda (lst dup-count)
-      (if (> (length lst )(length dup-count))
-           (duplicate-items lst (append dup-count dup-count))
-           (duplicate lst dup-count))
-   )
+    (lambda (lst dup-count)
+        (if (> (length lst ) (length dup-count))
+            (duplicate-items lst (append dup-count dup-count))
+            (duplicate lst dup-count))
+    )
 )
 
 (define duplicate
-  (lambda (lst dup-count)
-      (if (equal? lst '())
-           lst
-           (if (equal? (car dup-count) 0)
-               (duplicate (cdr lst) (cdr dup-count))
-               (cons (car lst) (duplicate lst (append (cons (-(car dup-count) 1) '()) (cdr dup-count)))))) 
-   )
+    (lambda (lst dup-count)
+        (if (equal? lst '())
+            '()
+            (if (equal? (car dup-count) 0)
+                (duplicate (cdr lst) (cdr dup-count))
+                (cons (car lst) (duplicate lst (append (cons (- (car dup-count) 1) '()) (cdr dup-count)))))) 
+    )
 )
 
 (define length
-  (lambda (lst)
-    (if (equal? lst '())
-        0
-        (+ 1 (length (cdr lst))))))
+    (lambda (lst)
+        (if (equal? lst '())
+            0
+            (+ 1 (length (cdr lst))))
+  )
+)
 
 
 
 (define payment
+  (lambda (n coins-lst)
+        (payment-with-collect n (collect coins-lst))                    
+      )
+)
+
+(define payment-with-collect
   (lambda (n coins-lst)
         (if (equal? n 0)
             1
@@ -50,22 +58,49 @@
                 0
                 (if (equal? coins-lst '())
                     0
-                    (+ (payment (- n (car coins-lst)) (cdr coins-lst))
-                    (if (equal? (next_differnt_coin (car coins-lst) (cdr coins-lst)) '())
-                       0
-                       (payment n (next_differnt_coin (car coins-lst) (cdr coins-lst))))))))
-                               
+                    (+ (payment-with-collect (- n (car coins-lst)) (cdr coins-lst))
+                        (if (equal? (next-differnt-coin (car coins-lst) (cdr coins-lst)) '())
+                            0
+                            (payment-with-collect n (next-differnt-coin (car coins-lst) (cdr coins-lst))))))))                       
+      )
+)
+
+(define collect
+  (lambda(lst)
+        (if (equal? lst '())
+            '()
+            (append (gather-num (car lst) lst) (collect (remove-all (car lst) lst)))
+  )
+))
+
+(define gather-num
+  (lambda(num lst)
+       (if (equal? lst '())
+           '()
+           (if (equal? num (car lst))
+               (cons num (gather-num num (cdr lst)))
+               (gather-num num (cdr lst))))
   )
 )
 
-(define next_differnt_coin
-  (lambda (num coins-lst)
-    (if (equal? coins-lst '())
-        coins-lst
-        (if (equal? num (car coins-lst))
-        (next_differnt_coin num (cdr coins-lst))
-        coins-lst))
-  )
+(define remove-all
+  (lambda (x lst)
+    (if (empty? lst)
+        lst
+        (if (equal? (car lst) x)
+            (remove-all x (cdr lst))
+            (cons (car lst) (remove-all x (cdr lst)))))))
+
+
+
+(define next-differnt-coin
+    (lambda (num coins-lst)
+        (if (equal? coins-lst '())
+            coins-lst
+            (if (equal? num (car coins-lst))
+                (next-differnt-coin num (cdr coins-lst))
+                coins-lst))
+    )
 )
 
                                
