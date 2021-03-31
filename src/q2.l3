@@ -1,0 +1,55 @@
+(define append 
+  (lambda(lst1 lst2)
+      (if (equal? lst1 '())
+            (if (equal? lst2 '())
+                lst2
+                (cons (car lst2 ) (append lst1 (cdr lst2))))
+            (cons (car lst1) (append (cdr lst1) lst2)))
+  )
+)
+
+(define reverse 
+  (lambda (lst)
+       (if (equal? lst '())
+           lst
+           (append(reverse(cdr lst))(cons(car lst) '()) ))
+  )
+)
+
+(define duplicate-items
+   (lambda (lst dup-count)
+      (if (> (length lst )(length dup-count))
+           (duplicate-items lst (append dup-count dup-count))
+           (duplicate lst dup-count))
+   )
+)
+
+(define duplicate
+  (lambda (lst dup-count)
+      (if (equal? lst '())
+           lst
+           (if (equal? (car dup-count) 0)
+               (duplicate (cdr lst) (cdr dup-count))
+               (cons (car lst) (duplicate lst (append (cons (-(car dup-count) 1) '()) (cdr dup-count)))))) 
+   )
+)
+
+(define length
+(lambda (lst)
+(if (equal? lst '())
+0
+(+ 1 (length (cdr lst))))))
+
+
+
+(define payment
+  (lambda (n coins-lst)
+        @TODO
+  )
+)
+                               
+(define compose-n
+  (lambda( f n)
+        @TODO
+  )
+)
