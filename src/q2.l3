@@ -43,14 +43,7 @@
 )
 
 
-
 (define payment
-  (lambda (n coins-lst)
-        (payment-with-collect n (collect coins-lst))                    
-      )
-)
-
-(define payment-with-collect
   (lambda (n coins-lst)
         (if (equal? n 0)
             1
@@ -58,29 +51,10 @@
                 0
                 (if (equal? coins-lst '())
                     0
-                    (+ (payment-with-collect (- n (car coins-lst)) (cdr coins-lst))
-                        (if (equal? (next-differnt-coin (car coins-lst) (cdr coins-lst)) '())
-                            0
-                            (payment-with-collect n (next-differnt-coin (car coins-lst) (cdr coins-lst))))))))                       
-      )
-)
-
-(define collect
-  (lambda(lst)
-        (if (equal? lst '())
-            '()
-            (append (gather-num (car lst) lst) (collect (remove-all (car lst) lst)))
-  )
-))
-
-(define gather-num
-  (lambda(num lst)
-       (if (equal? lst '())
-           '()
-           (if (equal? num (car lst))
-               (cons num (gather-num num (cdr lst)))
-               (gather-num num (cdr lst))))
-  )
+                    (+ (payment (- n (car coins-lst)) (cdr coins-lst))
+                        (payment n (remove-all (car coins-lst) (cdr coins-lst)))))))
+    )                       
+   
 )
 
 (define remove-all
