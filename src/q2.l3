@@ -1,7 +1,7 @@
 (define append 
     (lambda(lst1 lst2)
-        (if (equal? lst1 '())
-            (if (equal? lst2 '())
+        (if (eq? lst1 '())
+            (if (eq? lst2 '())
                 '()
                 (cons (car lst2 ) (append lst1 (cdr lst2))))
             (cons (car lst1) (append (cdr lst1) lst2)))
@@ -10,9 +10,9 @@
 
 (define reverse 
   (lambda (lst)
-      (if (equal? lst '())
+      (if (eq? lst '())
           '()
-          (append(reverse(cdr lst))(cons(car lst) '()) ))
+          (append(reverse(cdr lst))(cons(car lst) '())))
   )
 )
 
@@ -26,9 +26,9 @@
 
 (define duplicate
     (lambda (lst dup-count)
-        (if (equal? lst '())
+        (if (eq? lst '())
             '()
-            (if (equal? (car dup-count) 0)
+            (if (eq? (car dup-count) 0)
                 (duplicate (cdr lst) (cdr dup-count))
                 (cons (car lst) (duplicate lst (append (cons (- (car dup-count) 1) '()) (cdr dup-count)))))) 
     )
@@ -36,7 +36,7 @@
 
 (define length
     (lambda (lst)
-        (if (equal? lst '())
+        (if (eq? lst '())
             0
             (+ 1 (length (cdr lst))))
     )
@@ -45,11 +45,11 @@
 
 (define payment
   (lambda (n coins-lst)
-        (if (equal? n 0)
+        (if (eq? n 0)
             1
             (if ( < n 0)
                 0
-                (if (equal? coins-lst '())
+                (if (eq? coins-lst '())
                     0
                     (+ (payment (- n (car coins-lst)) (cdr coins-lst))
                         (payment n (remove-all (car coins-lst) (cdr coins-lst)))))))
@@ -59,9 +59,9 @@
 
 (define remove-all
   (lambda (x lst)
-    (if (empty? lst)
+    (if (eq? '() lst)
         lst
-        (if (equal? (car lst) x)
+        (if (eq? (car lst) x)
             (remove-all x (cdr lst))
             (cons (car lst) (remove-all x (cdr lst)))))))
 
@@ -69,9 +69,9 @@
 
 (define next-differnt-coin
     (lambda (num coins-lst)
-        (if (equal? coins-lst '())
+        (if (eq? coins-lst '())
             coins-lst
-            (if (equal? num (car coins-lst))
+            (if (eq? num (car coins-lst))
                 (next-differnt-coin num (cdr coins-lst))
                 coins-lst))
     )
@@ -80,7 +80,7 @@
                                
 (define compose-n
     (lambda( f n)
-          (if (equal? n 1)
+          (if (eq? n 1)
               f
               (compose f (compose-n f (- n 1))))
     )
@@ -88,6 +88,7 @@
 
 (define compose
     (lambda( foo1 foo2)
-      (lambda (x)(foo1 (foo2 x)) 
+      (lambda (x)(foo1 (foo2 x)))
+    
     )
 )
