@@ -236,51 +236,40 @@ const parceGoodClassMetodes = (variable: Sexp, val: Sexp): Result<Binding> =>
          (value: CExp) => makeOk(makeBinding((variable), value)));
 
 //( class ( <var>+ ) ( <binding>+ ) )/ ClassExp(fields:VarDecl[], methods:Binding[]))
+//<binding>  ::= ( <var> <cexp> )
+//varDecl ::= identifier
+//(class (a:fields[0] b:fields[1]):vars
+//  ((first (lambda () a)):methods[0][0]
+//  (second (lambda () b)):methods[0][1]
+//  (sum (lambda () (+ a b)):methods[0][2]
+//export interface ClassExp {tag: "ClassExp"; fields: VarDecl[], methods: Binding[]; }
+//export interface Binding {tag: "Binding"; var: VarDecl; val: CExp; }
+//export interface VarDecl {tag: "VarDecl"; var: string; }
 const parseClassExp = (vars: Sexp, methods: Sexp[]): Result<ClassExp> => {//TODO:
     if (isEmpty(vars) || isEmpty(methods)){
-        return makeFailure("Unexpected empty6")
+        return makeFailure("Unexpected empty")
     } 
-    if (!isGoodBindings(methods)){
-        return makeFailure('Malformed bindings in "class" expression');
-    }
     if (!(isArray(vars) && allT(isIdentifier, vars))){
         return makeFailure('Malformed vars in "class" expression');
     }
-  
-   console.log("methods=>")
-    console.log(methods);
-    console.log("methods[0]=>")
-    console.log( methods[0]);
-    console.log("methods[1]=>")
-    console.log(methods[1]);
-    console.log("first(methods)=>")
-    console.log(first(methods));
 
-
-    const methodsPreper = methods[0]
-    const varsMethods = map(m => m[0], methodsPreper);
-    console.log("---------------------------------------------------------------------!!!!!!!!!!!!!!!!!!!")
-    console.log("vars=>")
-    console.log(varsMethods)
-    console.log("vars[1]=>")
-    console.log(varsMethods[1])
-    console.log("vars[2]=>")
-    console.log(varsMethods[2])
-    //const methoedResult = mapResult( (m:Sexp[]) => parceGoodClassMetodes(first(methodsPreper),second(methodsPreper)),methods);
-   // return bind(methoedResult,(methods:Binding[]) => makeOk(makeClassExp(map(makeVarDecl, vars), methods)));
+    if(isToken(vars) && !isIdentifier(vars)){
+        return makeFailure('Malformed vars in "class" expression');
     
-//---------------------------------
-    const methoedResult = mapResult(m => parseL31CExp(m[1]), methodsPreper);
-
-    console.log("methoedResult=>")
-    console.log(methoedResult)
-   // const b = mapResult((vari)=> makeBinding(vari,m),methodsPreper] )
-    const deltethis = map(m=>m[0],first(methods))
-    const bindingsMethods = bind(methoedResult , (vals: CExp[])=> makeOk(zipWith(makeBinding,deltethis, vals)));
+    }
+    if(!isArray(methods)){
+        return makeFailure('Malformed bindings in "class" expression');
+    }
+    const workingMethods = methods[0]
+    if(!isGoodBindings(workingMethods)){
+        return makeFailure('Malformed bindings in "class" expression');
+    }
+    const varsMethods = map(m => m[0], workingMethods);
+    const methoedResult = mapResult(m => parseL31CExp(m[1]), workingMethods);
+    const bindingsMethods = bind(methoedResult , (vals: CExp[])=> makeOk(zipWith(makeBinding,varsMethods, vals)));
     return bind(bindingsMethods,(methods:Binding[]) => makeOk(makeClassExp(map(makeVarDecl, vars), methods)));
     
 }
-
 
 const parseLetExp = (bindings: Sexp, body: Sexp[]): Result<LetExp> => {
     if (!isGoodBindings(bindings)) {
@@ -342,7 +331,7 @@ const unparseProcExp = (pe: ProcExp): string =>
     `(lambda (${map((p: VarDecl) => p.var, pe.args).join(" ")}) ${unparseLExps(pe.body)})`
 
 const unparseClassExp = (pe: ClassExp): string => //TODO:
-    `(class (${map((p: VarDecl) => p.var, pe.fields).join(" ")}) ${map((b: Binding) => `((${(b.var.var)} ${unparseL31(b.val)})`, pe.methods).join(" ")}))`; 
+    `(class (${map((p: VarDecl) => p.var, pe.fields).join(" ")}) (${map((b: Binding) => `(${(b.var.var)} ${unparseL31(b.val)})`, pe.methods).join(" ")}))`; 
 const unparseLetExp = (le: LetExp) : string => 
     `(let (${map((b: Binding) => `(${b.var.var} ${unparseL31(b.val)})`, le.bindings).join(" ")}) ${unparseLExps(le.body)})`
 
