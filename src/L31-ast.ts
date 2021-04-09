@@ -236,28 +236,21 @@ const parceGoodClassMetodes = (variable: Sexp, val: Sexp): Result<Binding> =>
          (value: CExp) => makeOk(makeBinding((variable), value)));
 
 //( class ( <var>+ ) ( <binding>+ ) )/ ClassExp(fields:VarDecl[], methods:Binding[]))
-//<binding>  ::= ( <var> <cexp> )
-//varDecl ::= identifier
-//(class (a:fields[0] b:fields[1]):vars
-//  ((first (lambda () a)):methods[0][0]
-//  (second (lambda () b)):methods[0][1]
-//  (sum (lambda () (+ a b)):methods[0][2]
-//export interface ClassExp {tag: "ClassExp"; fields: VarDecl[], methods: Binding[]; }
-//export interface Binding {tag: "Binding"; var: VarDecl; val: CExp; }
-//export interface VarDecl {tag: "VarDecl"; var: string; }
 const parseClassExp = (vars: Sexp, methods: Sexp[]): Result<ClassExp> => {//TODO:
     if (isEmpty(vars) || isEmpty(methods)){
         return makeFailure("Unexpected empty6")
     } 
+    if (!isGoodBindings(methods)){
+        return makeFailure('Malformed bindings in "class" expression');
+    }
     if (!(isArray(vars) && allT(isIdentifier, vars))){
         return makeFailure('Malformed vars in "class" expression');
     }
-    const workingMethods = methods[0]
-    //map((method:Sexp) => makeBinding(method[0] ,method[1]) ,workingMethods)
-    console.log("methods=>")
+  
+   console.log("methods=>")
     console.log(methods);
-    console.log("methods[0][0][0]=>")
-    console.log( methods[0][0][0]);
+    console.log("methods[0]=>")
+    console.log( methods[0]);
     console.log("methods[1]=>")
     console.log(methods[1]);
     console.log("first(methods)=>")
@@ -265,7 +258,7 @@ const parseClassExp = (vars: Sexp, methods: Sexp[]): Result<ClassExp> => {//TODO
 
 
     const methodsPreper = methods[0]
-    const varsMethods = methodsPreper
+    const varsMethods = map(m => m[0], methodsPreper);
     console.log("---------------------------------------------------------------------!!!!!!!!!!!!!!!!!!!")
     console.log("vars=>")
     console.log(varsMethods)
@@ -277,13 +270,13 @@ const parseClassExp = (vars: Sexp, methods: Sexp[]): Result<ClassExp> => {//TODO
    // return bind(methoedResult,(methods:Binding[]) => makeOk(makeClassExp(map(makeVarDecl, vars), methods)));
     
 //---------------------------------
-    const methoedResult = mapResult(m => parseL31CExp(m[1]), methods);
+    const methoedResult = mapResult(m => parseL31CExp(m[1]), methodsPreper);
 
     console.log("methoedResult=>")
     console.log(methoedResult)
    // const b = mapResult((vari)=> makeBinding(vari,m),methodsPreper] )
-    const deltethis = map(m=>m[0],methods)
-    const bindingsMethods = bind(mapResult(parseL31CExp, vars) , (vals: CExp[])=> makeOk(zipWith(makeBinding,vars, vals)));
+    const deltethis = map(m=>m[0],first(methods))
+    const bindingsMethods = bind(methoedResult , (vals: CExp[])=> makeOk(zipWith(makeBinding,deltethis, vals)));
     return bind(bindingsMethods,(methods:Binding[]) => makeOk(makeClassExp(map(makeVarDecl, vars), methods)));
     
 }
