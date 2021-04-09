@@ -29,6 +29,7 @@ import { Sexp, Token } from "s-expression";
 ;;         |  <boolean>                     / BoolExp(val:boolean)
 ;;         |  <string>                      / StrExp(val:string)
 ;;         |  ( lambda ( <var>* ) <cexp>+ ) / ProcExp(args:VarDecl[], body:CExp[]))
+;;         |  ( class ( <var>+ ) ( <binding>+ ) )/ ClassExp(fields:VarDecl[], methods:Binding[]))
 ;;         |  ( if <cexp> <cexp> <cexp> )   / IfExp(test: CExp, then: CExp, alt: CExp)
 ;;         |  ( let ( binding* ) <cexp>+ )  / LetExp(bindings:Binding[], body:CExp[]))
 ;;         |  ( quote <sexp> )              / LitExp(val:SExp)
@@ -87,7 +88,7 @@ export const makeIfExp = (test: CExp, then: CExp, alt: CExp): IfExp =>
 export const makeProcExp = (args: VarDecl[], body: CExp[]): ProcExp =>
     ({tag: "ProcExp", args: args, body: body});
 export const makeClassExp = (fields: VarDecl[], methods: Binding[]): ClassExp =>
-({tag: "ClassExp", fields: fields, methods: methods});
+    ({tag: "ClassExp", fields: fields, methods: methods});
 export const makeBinding = (v: string, val: CExp): Binding =>
     ({tag: "Binding", var: makeVarDecl(v), val: val});
 export const makeLetExp = (bindings: Binding[], body: CExp[]): LetExp =>
@@ -181,6 +182,7 @@ const parseGoodDefine = (variable: Sexp, val: Sexp): Result<DefineExp> =>
     bind(parseL31CExp(val),
          (value: CExp) => makeOk(makeDefineExp(makeVarDecl(variable), value)));
 
+
 export const parseL31CExp = (sexp: Sexp): Result<CExp> =>
     isEmpty(sexp) ? makeFailure("CExp cannot be an empty list") :
     isArray(sexp) ? parseL31CompoundCExp(first(sexp), rest(sexp)) :
@@ -228,22 +230,58 @@ const isGoodBindings = (bindings: Sexp): bindings is [string, Sexp][] =>
     allT(isArray, bindings) &&
     allT(isIdentifier, map(first, bindings));
 
-const parseClassExp = (vars: Sexp, methods: Sexp): Result<ClassExp> => {//TODO:
+const parceGoodClassMetodes = (variable: Sexp, val: Sexp): Result<Binding> =>
+! isIdentifier(variable) ? makeFailure("First arg of bind must be an identifier") :
+    bind(parseL31CExp(val),
+         (value: CExp) => makeOk(makeBinding((variable), value)));
+
+//( class ( <var>+ ) ( <binding>+ ) )/ ClassExp(fields:VarDecl[], methods:Binding[]))
+const parseClassExp = (vars: Sexp, methods: Sexp[]): Result<ClassExp> => {//TODO:
     if (isEmpty(vars) || isEmpty(methods)){
-        return makeFailure("Unexpected empty")
+        return makeFailure("Unexpected empty6")
     } 
     if (!isGoodBindings(methods)){
         return makeFailure('Malformed bindings in "class" expression');
     }
-    if (!(isArray(vars) && allT(isString, vars))){
+    if (!(isArray(vars) && allT(isIdentifier, vars))){
         return makeFailure('Malformed vars in "class" expression');
     }
-    const variables = map(b => b[0], methods);
-    const valsResult = mapResult(method => parseL31CExp(second(method)), methods);
-    const bindingsResult = bind(valsResult, (vals: CExp[]) => makeOk(zipWith(makeBinding, variables, vals)))
-    return safe2((vars: VarDecl[], bindings: Binding[]) => makeOk(makeClassExp(vars, bindings)))
-        (makeOk(map(makeVarDecl,vars)), bindingsResult)
+  
+   console.log("methods=>")
+    console.log(methods);
+    console.log("methods[0]=>")
+    console.log( methods[0]);
+    console.log("methods[1]=>")
+    console.log(methods[1]);
+    console.log("first(methods)=>")
+    console.log(first(methods));
+
+
+    const methodsPreper = methods[0]
+    const varsMethods = map(m => m[0], methodsPreper);
+    const vvvv = map( v => toString, varsMethods)
+    console.log("---------------------------------------------------------------------!!!!!!!!!!!!!!!!!!!")
+    console.log("vars=>")
+    console.log(varsMethods)
+    console.log("vars[1]=>")
+    console.log(varsMethods[1])
+    console.log("vars[2]=>")
+    console.log(varsMethods[2])
+    //const methoedResult = mapResult( (m:Sexp[]) => parceGoodClassMetodes(first(methodsPreper),second(methodsPreper)),methods);
+   // return bind(methoedResult,(methods:Binding[]) => makeOk(makeClassExp(map(makeVarDecl, vars), methods)));
+    
+//---------------------------------
+    const methoedResult = mapResult(m => parseL31CExp(m[1]), methodsPreper);
+
+    console.log("methoedResult=>")
+    console.log(methoedResult)
+   // const b = mapResult((vari)=> makeBinding(vari,m),methodsPreper] )
+    const deltethis = map(m=>m[0],first(methods))
+    const bindingsMethods = bind(methoedResult , (vals: CExp[])=> makeOk(zipWith(makeBinding,deltethis, vals)));
+    return bind(bindingsMethods,(methods:Binding[]) => makeOk(makeClassExp(map(makeVarDecl, vars), methods)));
+    
 }
+
 
 const parseLetExp = (bindings: Sexp, body: Sexp[]): Result<LetExp> => {
     if (!isGoodBindings(bindings)) {
@@ -305,8 +343,7 @@ const unparseProcExp = (pe: ProcExp): string =>
     `(lambda (${map((p: VarDecl) => p.var, pe.args).join(" ")}) ${unparseLExps(pe.body)})`
 
 const unparseClassExp = (pe: ClassExp): string => //TODO:
-    `(class (${map((p: VarDecl) => p.var, pe.fields).join(" ")}) ${map((b: Binding) => `(${b.var.var} ${unparseL31(b.val)})`, pe.methods).join(" ")})})`
-
+    `(class (${map((p: VarDecl) => p.var, pe.fields).join(" ")}) ${map((b: Binding) => `((${(b.var.var)} ${unparseL31(b.val)})`, pe.methods).join(" ")}))`; 
 const unparseLetExp = (le: LetExp) : string => 
     `(let (${map((b: Binding) => `(${b.var.var} ${unparseL31(b.val)})`, le.bindings).join(" ")}) ${unparseLExps(le.body)})`
 
