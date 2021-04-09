@@ -249,14 +249,12 @@ const parseClassExp = (vars: Sexp, methods: Sexp[]): Result<ClassExp> => {//TODO
     if (isEmpty(vars) || isEmpty(methods)){
         return makeFailure("Unexpected empty6")
     } 
-    if (!isGoodBindings(methods)){
-        return makeFailure('Malformed bindings in "class" expression');
-    }
     if (!(isArray(vars) && allT(isIdentifier, vars))){
         return makeFailure('Malformed vars in "class" expression');
     }
-  
-   console.log("methods=>")
+    const workingMethods = methods[0]
+    //map((method:Sexp) => makeBinding(method[0] ,method[1]) ,workingMethods)
+    console.log("methods=>")
     console.log(methods);
     console.log("methods[0][0][0]=>")
     console.log( methods[0][0][0]);
@@ -267,8 +265,7 @@ const parseClassExp = (vars: Sexp, methods: Sexp[]): Result<ClassExp> => {//TODO
 
 
     const methodsPreper = methods[0]
-    const varsMethods = map(m => m[0], methodsPreper);
-    const vvvv = map( v => toString, varsMethods)
+    const varsMethods = methodsPreper
     console.log("---------------------------------------------------------------------!!!!!!!!!!!!!!!!!!!")
     console.log("vars=>")
     console.log(varsMethods)
@@ -280,13 +277,13 @@ const parseClassExp = (vars: Sexp, methods: Sexp[]): Result<ClassExp> => {//TODO
    // return bind(methoedResult,(methods:Binding[]) => makeOk(makeClassExp(map(makeVarDecl, vars), methods)));
     
 //---------------------------------
-    const methoedResult = mapResult(m => parseL31CExp(m[1]), methodsPreper);
+    const methoedResult = mapResult(m => parseL31CExp(m[1]), methods);
 
     console.log("methoedResult=>")
     console.log(methoedResult)
    // const b = mapResult((vari)=> makeBinding(vari,m),methodsPreper] )
     const deltethis = map(m=>m[0],methods)
-    const bindingsMethods = bind(methoedResult , (vals: CExp[])=> makeOk(zipWith(makeBinding,deltethis, vals)));
+    const bindingsMethods = bind(mapResult(parseL31CExp, vars) , (vals: CExp[])=> makeOk(zipWith(makeBinding,vars, vals)));
     return bind(bindingsMethods,(methods:Binding[]) => makeOk(makeClassExp(map(makeVarDecl, vars), methods)));
     
 }
