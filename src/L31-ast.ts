@@ -1,6 +1,6 @@
 // ===========================================================
 // AST type models
-import { map, zipWith } from "ramda";
+import { all, last, map, reduce, zipWith } from "ramda";
 import { makeEmptySExp, makeSymbolSExp, SExpValue, makeCompoundSExp, valueToString } from '../imp/L3-value'
 import { first, second, rest, allT, isEmpty } from "../shared/list";
 import { isArray, isString, isNumericString, isIdentifier } from "../shared/type-predicates";
@@ -230,10 +230,6 @@ const isGoodBindings = (bindings: Sexp): bindings is [string, Sexp][] =>
     allT(isArray, bindings) &&
     allT(isIdentifier, map(first, bindings));
 
-const parceGoodClassMetodes = (variable: Sexp, val: Sexp): Result<Binding> =>
-! isIdentifier(variable) ? makeFailure("First arg of bind must be an identifier") :
-    bind(parseL31CExp(val),
-         (value: CExp) => makeOk(makeBinding((variable), value)));
 
 //( class ( <var>+ ) ( <binding>+ ) )/ ClassExp(fields:VarDecl[], methods:Binding[]))
 //<binding>  ::= ( <var> <cexp> )
@@ -260,13 +256,18 @@ const parseClassExp = (vars: Sexp, methods: Sexp[]): Result<ClassExp> => {//TODO
     if(!isArray(methods)){
         return makeFailure('Malformed bindings in "class" expression');
     }
-    const workingMethods = methods[0]
+    const workingMethods:Sexp = methods[0]
     if(!isGoodBindings(workingMethods)){
         return makeFailure('Malformed bindings in "class" expression');
     }
-    const varsMethods = map(m => m[0], workingMethods);
-    const methoedResult = mapResult(m => parseL31CExp(m[1]), workingMethods);
-    const bindingsMethods = bind(methoedResult , (vals: CExp[])=> makeOk(zipWith(makeBinding,varsMethods, vals)));
+    
+    if(!(isArray(workingMethods[1]) && all((m:[string,Sexp]):boolean => m[1][0]=== 'lambda',workingMethods))){
+        return makeFailure('Methoed should be lambda expression');
+    }
+
+    const varsMethods:string[] = map((m:[string,Sexp]):string => m[0], workingMethods);
+    const methoedResult:Result<CExp[]> = mapResult((m:[string,Sexp]):Result<CExp> => parseL31CExp(m[1]), workingMethods);
+    const bindingsMethods :Result<Binding[]> = bind(methoedResult , (vals: CExp[]):Result<Binding[]> => makeOk(zipWith(makeBinding,varsMethods, vals)));
     return bind(bindingsMethods,(methods:Binding[]) => makeOk(makeClassExp(map(makeVarDecl, vars), methods)));
     
 }
