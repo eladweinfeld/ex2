@@ -1,6 +1,5 @@
-import { /*ClassExp, ProcExp, */ Exp, makeAppExp, makeBoolExp, makePrimOp, Program } from "./L31-ast";
+import { /*ClassExp, ProcExp, */ Exp, makeAppExp, makeBoolExp, makePrimOp, Program,Binding, IfExp,AppExp, CExp, isCExp, makeIfExp, makeLitExp, makeProcExp, makeVarDecl, makeVarRef  } from "./L31-ast";
 import { Result, makeFailure } from "../shared/result";
-import { Binding, IfExp,AppExp, CExp, isCExp, makeIfExp, makeLitExp, makeProcExp, makeVarDecl, makeVarRef } from "../imp/L3-ast";
 import { all, last, map, reduce, zipWith } from "ramda";
 import { first, second } from "../shared/list";
 import { makeSymbolSExp } from "../imp/L3-value";
@@ -60,11 +59,15 @@ export const class2proc = (exp: ClassExp): ProcExp =>
 (second (lambda () b))
 (sum (lambda () (+ a b)))
 */
-export const class2If = (binding:Binding[]):IfExp => {
-    const appexp = makeAppExp(makePrimOp("eq?"),[makeVarRef('msg'),makeLitExp(makeSymbolSExp(first(binding).var.var))])
-    binding.length===1?
-    makeIfExp(appexp,first(binding).val,makeBoolExp(false)):
-    makeIfExp(appexp,first(binding).val,class2proc(second(binding)) 
+export const class2If = (binding:Binding[]): IfExp => {
+    const appexp:AppExp = makeAppExp(makePrimOp("eq?"),[makeVarRef('msg'),makeLitExp(makeSymbolSExp(first(binding).var.var))])
+   if(binding.length === 1){
+    return makeIfExp(appexp,first(binding).val,makeBoolExp(false))
+   }
+   else
+    return makeIfExp(appexp,first(binding).val,class2proc(second(binding)) 
+
+    
     
     
 
