@@ -36,7 +36,6 @@ Type: ClassExp => ProcExp
 
 export const class2proc = (exp: ClassExp): ProcExp =>
 
-    const test = makeProcExp([makeVarDecl('msg')],[class2If(exp.metods)])
     // ( if <cexp> <cexp> <cexp> )   / IfExp(test: CExp, then: CExp, alt: CExp)
     //  <var> ::= <identifier>                   / VarRef(var:string)
     //      |  ( if <cexp> <cexp> <cexp> )   / IfExp(test: CExp, then: CExp, alt: CExp)
