@@ -1,5 +1,5 @@
 import { is, map } from 'ramda';
-import { Exp, isBoolExp, isExp, isProgram, Program, isNumExp, isStrExp ,isVarRef, isProcExp, isIfExp, isAppExp, isPrimOp, isDefineExp, ProcExp, VarDecl } from '../imp/L3-ast';
+import { Exp, isBoolExp, isExp, isProgram, Program, isNumExp, isStrExp ,isVarRef, isProcExp, isIfExp, isAppExp, isPrimOp, isDefineExp, ProcExp, VarDecl, PrimOp } from '../imp/L3-ast';
 import { valueToString } from '../imp/L3-value';
 import { Result, makeFailure, makeOk } from '../shared/result';
 
@@ -14,7 +14,7 @@ export const l2ToPython = (exp: Exp | Program): Result<string>  =>
     isProgram(exp) ? makeOk(map(L2ExpToPythonExp,exp.exps).join()) : makeOk(exp)
 
 export const proc2Python = (pe:ProcExp):string =>
-`(lambda (${map((p: VarDecl) => p.var, pe.args).join(",")}) : ${l2toPythonLExps(pe.body)})`
+`(lambda (${map((p: VarDecl) => p.var, pe.args).join(", ")}) : (${L2ExpToPythonExp(pe.body[0])}))`
 
 export const l2toPythonLExps = (les: Exp[]): string => {
     const oper = les[0]
@@ -56,10 +56,10 @@ const isOp = (str:string):boolean =>
     str === ">" ? true:
     str === "/" ? true:
     false
+
+
     
-
             
-
 export const L2ExpToPythonExp = (exp:Exp):string => 
     isBoolExp(exp) ? valueToString(exp.val) :
     isNumExp(exp) ? valueToString(exp.val) :
@@ -67,7 +67,7 @@ export const L2ExpToPythonExp = (exp:Exp):string =>
     isVarRef(exp) ? exp.var :
     isProcExp(exp) ? proc2Python(exp) :
     isIfExp(exp) ? `(${L2ExpToPythonExp(exp.test)} if  ${L2ExpToPythonExp(exp.then)} else ${L2ExpToPythonExp(exp.alt)})` :
-    isAppExp(exp) ? `(${L2ExpToPythonExp(exp.rator)} ${l2toPythonLExps(exp.rands)})` :
+    isAppExp(exp) ? `(${ map(L2ExpToPythonExp, exp.rands).join(" " + L2ExpToPythonExp(exp.rator)+ " ")})` :
     isPrimOp(exp) ? exp.op :
     isDefineExp(exp) ? `(${exp.var.var} = ${L2ExpToPythonExp(exp.val)})` :
     "never";
