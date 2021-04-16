@@ -241,7 +241,7 @@ const isGoodBindings = (bindings: Sexp): bindings is [string, Sexp][] =>
 //export interface ClassExp {tag: "ClassExp"; fields: VarDecl[], methods: Binding[]; }
 //export interface Binding {tag: "Binding"; var: VarDecl; val: CExp; }
 //export interface VarDecl {tag: "VarDecl"; var: string; }
-const parseClassExp = (vars: Sexp, methods: Sexp[]): Result<ClassExp> => {//TODO:
+const parseClassExp = (vars: Sexp, methods: Sexp[]): Result<ClassExp> => {
     if (isEmpty(vars) || isEmpty(methods)){
         return makeFailure("Unexpected empty")
     } 
@@ -331,8 +331,9 @@ const unparseLExps = (les: Exp[]): string =>
 const unparseProcExp = (pe: ProcExp): string => 
     `(lambda (${map((p: VarDecl) => p.var, pe.args).join(" ")}) ${unparseLExps(pe.body)})`
 
-const unparseClassExp = (pe: ClassExp): string => //TODO:
+const unparseClassExp = (pe: ClassExp): string =>
     `(class (${map((p: VarDecl) => p.var, pe.fields).join(" ")}) (${map((b: Binding) => `(${(b.var.var)} ${unparseL31(b.val)})`, pe.methods).join(" ")}))`; 
+
 const unparseLetExp = (le: LetExp) : string => 
     `(let (${map((b: Binding) => `(${b.var.var} ${unparseL31(b.val)})`, le.bindings).join(" ")}) ${unparseLExps(le.body)})`
 

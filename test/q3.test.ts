@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { unparseL31, parseL31, parseL31Exp } from '../src/L31-ast';
-import { class2proc, L31ToL3 } from '../src/q3';
+import { L31ToL3 } from '../src/q3';
 import { makeOk, bind, isFailure } from '../shared/result';
 import { parse as p } from "../shared/parser";
 
@@ -13,14 +13,13 @@ describe('Q3 Tests', () => {
           expect(bind(p(`(class ((first (lambda () a)) (second (lambda () b)) (sum (lambda () (+ a b)))))`),parseL31Exp)).is.satisfy(isFailure);
      });
 
+     it('test parse wrong class2', () => {
+          expect(bind(p(`(class (a b) ((first (lambda () a)) (second 5) (sum (lambda () (+ a b)))))`),parseL31Exp)).is.satisfy(isFailure);
+     });
 
      it('test parse/unparse program', () => {
           expect(bind(parseL31(`(L31 (define pair (class (a b) ((first (lambda () a)) (second (lambda () b)) (sum (lambda () (+ a b)))))) (let ((p12 (pair 1 2)) (p34 (pair 3 4))) (if (> (p12 'first) (p34 'second)) #t #f)))`), x=>makeOk(unparseL31(x)))).to.deep.equal(makeOk(`(L31 (define pair (class (a b) ((first (lambda () a)) (second (lambda () b)) (sum (lambda () (+ a b)))))) (let ((p12 (pair 1 2)) (p34 (pair 3 4))) (if (> (p12 'first) (p34 'second)) #t #f)))`));
          });
-     
-     it('test parse wrong lambda class', () => {
-          expect(bind(p(`(class (a b) ((first (lambda () a)) (second (lambda () b)) (sum (+ a b))))`),parseL31Exp)).is.satisfy(isFailure);
-     });
      
      
      it('trnasform class-exp in to proc-exp', () => {

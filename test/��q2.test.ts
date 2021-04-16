@@ -25,6 +25,8 @@ describe('Q2 Tests', () => {
     {
         expect(evalP(`(L3`+q2+`(duplicate-items (list 1 2 3) (list 1 0) ))`)).to.deep.equal(makeOk(listPrim([1,3])));
         expect(evalP(`(L3`+q2+`(duplicate-items (list 1 2 3 4) (list 1 1) ))`)).to.deep.equal(makeOk(listPrim([1,2,3,4])));
+        expect(evalP(`(L3`+q2+`(duplicate-items (list 1 2 3 4) (list 1 2) ))`)).to.deep.equal(makeOk(listPrim([1,2,2,3,4,4])));
+
     }
     );
     it(`payment`,()=>

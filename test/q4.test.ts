@@ -15,6 +15,16 @@ describe('Q4 Tests', () => {
          expect(l2ToPythonResult(`(= 3 (+ 1 2))`)).to.deep.equal(makeOk(`(3 == (1 + 2))`));
      });
 
+     it("parse eq?", () => {
+        expect(l2ToPythonResult(`(eq? 3 4)`)).to.deep.equal(makeOk(`(3 == 4)`));
+    });
+    it("parse number?", () => {
+        expect(l2ToPythonResult(`(number? 3)`)).to.deep.equal(makeOk(`(lambda x : ((type(x) == int) or (type(x) == float)))(3)`));
+    });
+    it("parse or", () => {
+        expect(l2ToPythonResult(`(or x y)`)).to.deep.equal(makeOk(`(x or y)`));
+    });
+
      it('parse "if" expressions', () => {
          expect(l2ToPythonResult(`(if (> x 3) 4 5)`)).to.deep.equal(makeOk(`(4 if (x > 3) else 5)`));
      });
